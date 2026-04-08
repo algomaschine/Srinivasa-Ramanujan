@@ -176,7 +176,7 @@ fig_price.update_layout(
     xaxis_rangeslider_bordercolor='rgba(100,100,100,0.5)'
 )
 
-st.plotly_chart(fig_price, use_container_width=True)
+st.plotly_chart(fig_price, width="stretch")
 
 # Layout
 col1, col2 = st.columns(2)
@@ -205,9 +205,15 @@ with col1:
             x0=len(prices) - western_period, y0=min(prices),
             x1=len(prices), y1=max(prices),
             fillcolor="green", opacity=0.1,
-            line_width=0,
-            annotation_text=f"Detected Period: {western_period:.0f}",
-            annotation_position="top"
+            line_width=0
+        )
+        fig_western.add_annotation(
+            x=len(prices) - western_period / 2,
+            y=max(prices),
+            text=f"Detected Period: {western_period:.0f}",
+            showarrow=False,
+            yshift=10,
+            font=dict(color="green", size=12)
         )
     
     fig_western.update_layout(
@@ -217,7 +223,7 @@ with col1:
         yaxis_title="Price",
         hovermode='x unified'
     )
-    st.plotly_chart(fig_western, use_container_width=True)
+    st.plotly_chart(fig_western, width="stretch")
 
 with col2:
     st.subheader("☯️ Daoist View: Dialectical Tension")
@@ -242,10 +248,10 @@ with col2:
     ))
     
     # Wuji lines
-    fig_daoist.add_hline(y=0.2, line_dash="dash", line_color="gray", opacity=0.5, annotation_text="Wuji Zone")
+    fig_daoist.add_hline(y=0.2, line_dash="dash", line_color="gray", opacity=0.5, annotation_text="Wuji Zone", annotation_position="right")
     fig_daoist.add_hline(y=-0.2, line_dash="dash", line_color="gray", opacity=0.5)
-    fig_daoist.add_hline(y=0.6, line_dash="dot", line_color="orange", opacity=0.5, annotation_text="Extreme Yang")
-    fig_daoist.add_hline(y=-0.6, line_dash="dot", line_color="blue", opacity=0.5, annotation_text="Extreme Yin")
+    fig_daoist.add_hline(y=0.6, line_dash="dot", line_color="orange", opacity=0.5, annotation_text="Extreme Yang", annotation_position="right")
+    fig_daoist.add_hline(y=-0.6, line_dash="dot", line_color="blue", opacity=0.5, annotation_text="Extreme Yin", annotation_position="right")
     
     fig_daoist.update_layout(
         height=300,
@@ -255,7 +261,7 @@ with col2:
         yaxis_range=[-1, 1],
         hovermode='x unified'
     )
-    st.plotly_chart(fig_daoist, use_container_width=True)
+    st.plotly_chart(fig_daoist, width="stretch")
 
 # Third row: Phase Space Visualization
 st.subheader("🌀 Phase Space: The Taijitu Orbit")
@@ -318,7 +324,7 @@ fig_phase.update_layout(
     shape_type='circle'
 )
 
-st.plotly_chart(fig_phase, use_container_width=False)
+st.plotly_chart(fig_phase, width="content")
 
 # Conclusion
 st.markdown("---")
@@ -399,7 +405,7 @@ with col_chart1:
         height=400,
         margin=dict(l=20, r=20, t=40, b=20)
     )
-    st.plotly_chart(fig_equity, use_container_width=True)
+    st.plotly_chart(fig_equity, width="stretch")
 
 with col_chart2:
     fig_period = go.Figure()
@@ -418,7 +424,7 @@ with col_chart2:
         height=400,
         margin=dict(l=20, r=20, t=40, b=20)
     )
-    st.plotly_chart(fig_period, use_container_width=True)
+    st.plotly_chart(fig_period, width="stretch")
 
 # Detailed view with signals
 st.subheader("📊 Signal Detail View")
@@ -468,7 +474,7 @@ fig_signals.update_layout(
     hovermode='x unified'
 )
 
-st.plotly_chart(fig_signals, use_container_width=True)
+st.plotly_chart(fig_signals, width="stretch")
 
 # Tension with position overlay
 fig_tension_pos = go.Figure()
@@ -495,9 +501,9 @@ for pos_val, color, name in [(1, 'green', 'Long'), (-1, 'red', 'Short'), (0, 'gr
             opacity=0.5
         ))
 
-fig_tension_pos.add_hline(y=0.6, line_dash="dot", line_color="orange", opacity=0.5, annotation_text="Extreme Yang")
-fig_tension_pos.add_hline(y=-0.6, line_dash="dot", line_color="blue", opacity=0.5, annotation_text="Extreme Yin")
-fig_tension_pos.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.3, annotation_text="Wuji")
+fig_tension_pos.add_hline(y=0.6, line_dash="dot", line_color="orange", opacity=0.5, annotation_text="Extreme Yang", annotation_position="right")
+fig_tension_pos.add_hline(y=-0.6, line_dash="dot", line_color="blue", opacity=0.5, annotation_text="Extreme Yin", annotation_position="right")
+fig_tension_pos.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.3, annotation_text="Wuji", annotation_position="right")
 
 fig_tension_pos.update_layout(
     title="Tension with Active Positions",
@@ -508,7 +514,7 @@ fig_tension_pos.update_layout(
     margin=dict(l=20, r=20, t=40, b=20)
 )
 
-st.plotly_chart(fig_tension_pos, use_container_width=True)
+st.plotly_chart(fig_tension_pos, width="stretch")
 
 # Export data
 st.subheader("📥 Export Results")
