@@ -1,1 +1,13 @@
-Nothing should be ignored based on the provided file changes. The only modified file is `daoist_app.py`, which is a Python source file and should not be added to .gitignore.
+```
+# Compiled Python files
+*.pyc
+__pycache__/
+
+# Environment files
+.env
+.env.local
+*.env.*
+
+# Logs
+*.log
+```
