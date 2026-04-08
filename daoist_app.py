@@ -119,11 +119,15 @@ daoist_result = scanner.scan(prices)
 
 # Create DataFrame for plotting (ensure we have a proper index)
 if not isinstance(df_raw.index, pd.DatetimeIndex):
-    df_raw = df_raw.set_index('date')
+    if 'date' in df_raw.columns:
+        df_raw = df_raw.set_index('date')
+    else:
+        # Create date index if missing
+        df_raw = df_raw.set_index(pd.date_range(start='2020-01-01', periods=len(df_raw), freq='D'))
 
 df = df_raw.copy()
 df['Time'] = range(len(df))  # Keep for color mapping in phase plot
-df['TimeIdx'] = df.reset_index().index  # Numeric index for x-axis plots
+df['TimeIdx'] = np.arange(len(df))  # Numeric index for x-axis plots
 
 # Calculate Yin/Yang for visualization
 yang, yin = scanner.calculate_polarities(prices)
@@ -190,7 +194,7 @@ with col1:
     - **Weakness**: Struggles when cycles stretch/compress or when noise is high.
     """)
     
-    # Plot Western-style: Price + highlighted周期
+    # Plot Western-style: Price + highlighted cycle with proper date axis
     fig_western = go.Figure()
     fig_western.add_trace(go.Scatter(
         x=df.index, y=df['close'], 
@@ -198,30 +202,39 @@ with col1:
         line=dict(color='#1f77b4', width=1)
     ))
     
-    # Mark detected周期
+    # Mark detected cycle using actual dates
     if western_period > 0:
+        start_idx = max(0, len(df) - int(western_period))
+        start_date = df.index[start_idx]
+        end_date = df.index[-1]
+        min_price = df['low'].min() if 'low' in df.columns else df['close'].min()
+        max_price = df['high'].max() if 'high' in df.columns else df['close'].max()
+        
         fig_western.add_shape(
             type="rect",
-            x0=len(prices) - western_period, y0=min(prices),
-            x1=len(prices), y1=max(prices),
+            x0=start_date, x1=end_date,
+            y0=min_price, y1=max_price,
             fillcolor="green", opacity=0.1,
             line_width=0
         )
         fig_western.add_annotation(
-            x=len(prices) - western_period / 2,
-            y=max(prices),
-            text=f"Detected Period: {western_period:.0f}",
+            x=end_date,
+            y=max_price,
+            text=f"Detected Period: {western_period:.0f} bars",
             showarrow=False,
             yshift=10,
-            font=dict(color="green", size=12)
+            font=dict(color="green", size=12),
+            xref="x", yref="y"
         )
     
     fig_western.update_layout(
         height=300,
         margin=dict(l=20, r=20, t=40, b=20),
-        xaxis_title="Time",
+        xaxis_title="Date",
         yaxis_title="Price",
-        hovermode='x unified'
+        hovermode='x unified',
+        xaxis=dict(showgrid=True, gridwidth=1, gridcolor='#eee'), # Hairlines
+        yaxis=dict(showgrid=True, gridwidth=1, gridcolor='#eee')
     )
     st.plotly_chart(fig_western, width="stretch")
 
@@ -241,25 +254,27 @@ with col2:
     
     # Tension over time
     fig_daoist.add_trace(go.Scatter(
-        x=df['TimeIdx'], y=df['Tension'],
+        x=df.index, y=df['Tension'],
         mode='lines', name='Yin-Yang Tension',
         line=dict(color='#d62728', width=2),
         fill='tozeroy'
     ))
     
     # Wuji lines
-    fig_daoist.add_hline(y=0.2, line_dash="dash", line_color="gray", opacity=0.5, annotation_text="Wuji Zone", annotation_position="right")
+    fig_daoist.add_hline(y=0.2, line_dash="dash", line_color="gray", opacity=0.5)
     fig_daoist.add_hline(y=-0.2, line_dash="dash", line_color="gray", opacity=0.5)
-    fig_daoist.add_hline(y=0.6, line_dash="dot", line_color="orange", opacity=0.5, annotation_text="Extreme Yang", annotation_position="right")
-    fig_daoist.add_hline(y=-0.6, line_dash="dot", line_color="blue", opacity=0.5, annotation_text="Extreme Yin", annotation_position="right")
+    fig_daoist.add_hline(y=0.6, line_dash="dot", line_color="orange", opacity=0.5)
+    fig_daoist.add_hline(y=-0.6, line_dash="dot", line_color="blue", opacity=0.5)
     
     fig_daoist.update_layout(
         height=300,
         margin=dict(l=20, r=20, t=40, b=20),
-        xaxis_title="Time",
+        xaxis_title="Date",
         yaxis_title="Tension (Yang - Yin)",
         yaxis_range=[-1, 1],
-        hovermode='x unified'
+        hovermode='x unified',
+        xaxis=dict(showgrid=True, gridwidth=1, gridcolor='#eee'),
+        yaxis=dict(showgrid=True, gridwidth=1, gridcolor='#eee')
     )
     st.plotly_chart(fig_daoist, width="stretch")
 
@@ -321,7 +336,9 @@ fig_phase.update_layout(
     yaxis_title="Yin Axis",
     xaxis_range=[-1.5, 1.5],
     yaxis_range=[-1.5, 1.5],
-    shape_type='circle'
+    xaxis=dict(showgrid=True, gridwidth=1, gridcolor='#eee'),
+    yaxis=dict(showgrid=True, gridwidth=1, gridcolor='#eee'),
+    shape_mode='overlay'
 )
 
 st.plotly_chart(fig_phase, width="content")
@@ -501,9 +518,9 @@ for pos_val, color, name in [(1, 'green', 'Long'), (-1, 'red', 'Short'), (0, 'gr
             opacity=0.5
         ))
 
-fig_tension_pos.add_hline(y=0.6, line_dash="dot", line_color="orange", opacity=0.5, annotation_text="Extreme Yang", annotation_position="right")
-fig_tension_pos.add_hline(y=-0.6, line_dash="dot", line_color="blue", opacity=0.5, annotation_text="Extreme Yin", annotation_position="right")
-fig_tension_pos.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.3, annotation_text="Wuji", annotation_position="right")
+fig_tension_pos.add_hline(y=0.6, line_dash="dot", line_color="orange", opacity=0.5, )
+fig_tension_pos.add_hline(y=-0.6, line_dash="dot", line_color="blue", opacity=0.5, )
+fig_tension_pos.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.3, )
 
 fig_tension_pos.update_layout(
     title="Tension with Active Positions",
