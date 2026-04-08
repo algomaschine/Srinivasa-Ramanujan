@@ -119,10 +119,11 @@ daoist_result = scanner.scan(prices)
 
 # Create DataFrame for plotting (ensure we have a proper index)
 if not isinstance(df_raw.index, pd.DatetimeIndex):
-    df_raw.index = pd.RangeIndex(start=0, stop=len(df_raw))
+    df_raw = df_raw.set_index('date')
 
 df = df_raw.copy()
-df['Time'] = range(len(df))
+df['Time'] = range(len(df))  # Keep for color mapping in phase plot
+df['TimeIdx'] = df.reset_index().index  # Numeric index for x-axis plots
 
 # Calculate Yin/Yang for visualization
 yang, yin = scanner.calculate_polarities(prices)
@@ -192,7 +193,7 @@ with col1:
     # Plot Western-style: Price + highlighted周期
     fig_western = go.Figure()
     fig_western.add_trace(go.Scatter(
-        x=df['Time'], y=df['Price'], 
+        x=df.index, y=df['close'], 
         mode='lines', name='Price',
         line=dict(color='#1f77b4', width=1)
     ))
@@ -234,7 +235,7 @@ with col2:
     
     # Tension over time
     fig_daoist.add_trace(go.Scatter(
-        x=df['Time'], y=df['Tension'],
+        x=df['TimeIdx'], y=df['Tension'],
         mode='lines', name='Yin-Yang Tension',
         line=dict(color='#d62728', width=2),
         fill='tozeroy'
