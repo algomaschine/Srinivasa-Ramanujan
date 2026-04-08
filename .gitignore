@@ -1,7 +1,4 @@
-Nothing should be ignored in this case, as the added files (`daoist_app.py` and `daoist_cycle.py`) are Python source code files, which should be tracked by Git. There are no build artifacts, dependencies, or temporary files in the changes that would warrant adding ignore rules.
-
-Therefore, the output is empty:
-
-```text
-
+```
+__pycache__/
+*.pyc
 ```
