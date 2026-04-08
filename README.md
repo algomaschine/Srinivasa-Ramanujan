@@ -34,12 +34,18 @@ pip install -r requirements.txt
 - `pandas` (Data manipulation)
 - `numpy` (Numerical operations)
 - `scipy` (Signal processing utilities)
+- `tornado` (Web server framework - required for Streamlit 1.56+)
 
 ### 3. Launch the Application
 ```bash
 streamlit run daoist_app.py
 ```
 The app will open automatically in your browser at `http://localhost:8501` (or the next available port).
+
+**Note:** If you encounter a `PY_SSIZE_T_CLEAN` error, upgrade tornado:
+```bash
+pip install --upgrade tornado
+```
 
 ## 📊 Usage Guide
 
